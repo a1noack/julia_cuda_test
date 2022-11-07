@@ -3,28 +3,35 @@ using LinearAlgebra
 using BenchmarkTools
 using CUDA
 
+"""
+    matmult(A::Matrix{Float64}, T::Int64)
+
+Multiply matrix `A` by itself `T` times using CPU.
+"""
 function matmult(A::Matrix{Float64}, T::Int64)
     
-    N = size(A)[1]
-    B = rand(N, N)
     for i in 1:T
-        B *= A 
+        A *= A 
     end 
 
-    return B::Matrix{Float64}
+    return A::Matrix{Float64}
 end 
 
-function matmultcu(A::Matrix{Float64}, T::Int64)
-    
-    A = CUDA.cu(A)
-    N = size(A)[1]
-    B = CUDA.cu(rand(N, N))
-    for i in 1:T
-        B *= A 
-    end 
-    
-    B = B |> Matrix{Float64}    
+"""
+    matmultcuda(A::Matrix{Float64}, T::Int64)
 
-    return B::Matrix{Float64}
+Multiply matrix `A` by itself `T` times using GPU.
+"""
+function matmultcuda(A::Matrix{Float64}, T::Int64)
+    
+    # Convert `A` to CUDA matrix type
+    A = CUDA.cu(A)
+    for i in 1:T
+        A *= A 
+    end 
+    # Convert `A` back to regular matrix w/ Float64 entries 
+    A = A |> Matrix{Float64}    
+
+    return A::Matrix{Float64}
 end 
 
